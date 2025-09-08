@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace testFunction01
 {
@@ -17,10 +18,16 @@ namespace testFunction01
 
         public class SensorData
         {
-            public DateTime timestamp { get; set; }
-            public int tmp01 { get; set; }
-            public int tmp02 { get; set; }
+            [JsonPropertyName("timestamp")]
+            public DateTime Timestamp { get; set; }
+
+            [JsonPropertyName("tmp01")]
+            public int Tmp01 { get; set; }
+
+            [JsonPropertyName("tmp02")]
+            public int Tmp02 { get; set; }
         }
+
 
         [Function("Function1")]
         public async Task<IActionResult> Run(
@@ -34,11 +41,11 @@ namespace testFunction01
                 return new BadRequestObjectResult("JSON inválido");
 
             // Converte para valor real (dividindo por 100)
-            double t1 = data.tmp01 / 100.0;
-            double t2 = data.tmp02 / 100.0;
+            double t1 = data.Tmp01 / 100.0;
+            double t2 = data.Tmp02 / 100.0;
 
             return new OkObjectResult(
-                $"[{data.timestamp:u}] tmp01={t1}, tmp02={t2}"
+                $"[{data.Timestamp:u}] tmp01={t1}, tmp02={t2}"
             );
         }
     }
