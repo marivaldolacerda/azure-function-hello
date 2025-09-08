@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "testFunction01": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7030",
+      "launchBrowser": false
+    }
+  }
+}
