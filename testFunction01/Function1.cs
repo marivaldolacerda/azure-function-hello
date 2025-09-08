@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace testFunction01
 {
@@ -14,31 +15,31 @@ namespace testFunction01
             _logger = logger;
         }
 
-        [Function("Function1")]
-        public IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequest req)
+        public class SensorData
         {
-            _logger.LogInformation("C# HTTP trigger function processed a request.");
+            public DateTime timestamp { get; set; }
+            public int tmp01 { get; set; }
+            public int tmp02 { get; set; }
+        }
 
-            string? aStr = req.Query["a"];
-            string? bStr = req.Query["b"];
+        [Function("Function1")]
+        public async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+            ILogger log)
+        {
+            var body = await new StreamReader(req.Body).ReadToEndAsync();
+            var data = JsonSerializer.Deserialize<SensorData>(body);
 
-            if (int.TryParse(aStr, out int a) && int.TryParse(bStr, out int b))
-            {
-                // Converte para "real" dividindo por 100
-                double realA = a / 100.0;
-                double realB = b / 100.0;
+            if (data == null)
+                return new BadRequestObjectResult("JSON inválido");
 
-                double soma = realA + realB;
+            // Converte para valor real (dividindo por 100)
+            double t1 = data.tmp01 / 100.0;
+            double t2 = data.tmp02 / 100.0;
 
-                return new OkObjectResult(
-                    $"A soma de {realA} + {realB} = {soma}"
-                );
-            }
-            else
-            {
-                return new BadRequestObjectResult("Passe dois inteiros válidos escalados (ex: ?a=312&b=-326)");
-            }
+            return new OkObjectResult(
+                $"[{data.timestamp:u}] tmp01={t1}, tmp02={t2}"
+            );
         }
     }
 }
