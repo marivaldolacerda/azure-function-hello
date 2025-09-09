@@ -84,6 +84,7 @@ namespace testFunction01
             return new OkObjectResult(
                 $"Saved: pk={data.DeviceId}, rk={rowKey}\n[{data.Timestamp:u}] tmp01={t1}, tmp02={t2}"
             );
+
         }
     }
 }
